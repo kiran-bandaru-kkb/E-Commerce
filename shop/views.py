@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
+from django.db.models import F, Sum, ExpressionWrapper, DecimalField
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .permissions import IsAdminOrOwnerOrReadOnly, IsOwnerOrAdmin
 from .serializers import CategorySerializer, ProductSerializer, CartSerializer, CartItemSerializer, OrderSerializer, OrderItemSerializer
@@ -65,9 +66,16 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({"error": "Cart is empty"}, status=400)
 
         with transaction.atomic():
+            total_price = (
+                    items.annotate(
+                        line_total=ExpressionWrapper(F('product__price') * F('quantity'), output_field=DecimalField())
+                    )
+                    .aggregate(total=Sum('line_total'))['total'] or 0
+            )
+
             order = Order.objects.create(
                 user=user,
-                total_price=sum([item.product.price * item.quantity for item in items]),
+                total_price=total_price,
                 status="pending"
             )
             for item in items:
@@ -85,5 +93,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        if self.request.user.is_admin:
+            return OrderItem.objects.all()
+        return OrderItem.objects.filter(order__user=self.request.user)
 
