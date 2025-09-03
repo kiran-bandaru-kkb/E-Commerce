@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from accounts.views import UserViewSet
+from accounts.views import UserViewSet, RegisterView
 from shop.views import CategoryViewSet, ProductViewSet, CartViewSet, OrderViewSet, CartItemViewSet, OrderItemViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -37,4 +37,7 @@ urlpatterns = [
     # JWT auth
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Signup
+    path('api/register/', RegisterView.as_view(), name='register'),
 ]
