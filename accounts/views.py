@@ -8,7 +8,7 @@ from .serializers import UserSerializer, RegisterSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    permission_classes = [permissions.AllowAny]  # anyone can signup
+    permission_classes = [permissions.AllowAny]  # anyone can sign up
     serializer_class = RegisterSerializer
 
 class LogoutView(APIView):
