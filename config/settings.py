@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     # Local apps
     'accounts',
@@ -144,4 +145,6 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),   # short-lived
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),     # longer-lived
+    "ROTATE_REFRESH_TOKENS": True,                   # rotates refresh
+    "BLACKLIST_AFTER_ROTATION": True,                # logout
 }
